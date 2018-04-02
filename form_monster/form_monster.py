@@ -1,21 +1,6 @@
-import os
+from .utils import clear_screan
+from .command import SetCommand
 
-def clear_screan():
-    os.system("cls")
-
-class Command(object):
-    def __init__(self, context):
-        self.ctx = context
-    
-    def exec(self, args):
-        pass
-
-class SetCommand(Command):
-    def exec(self, args):
-        index = args[0]
-        value = args[1:].join(" ")
-        self.ctx.value[index] = value
-        return 
 
 class FormMonster(object):
     valid_tokens = {
@@ -84,16 +69,16 @@ class FormMonster(object):
             command = self.valid_tokens[command_name]
             args = tokens[1:]
             if len(args) < command["arity"]:
-                errors.append("Invalid arity")     
+                errors.append("Invalid arity")
         except KeyError:
             errors.append("{} is not a valid command".format(command_name))
 
         return ([command] + args, errors)
-    
+
     def __eval(self, tokens):
         if tokens:
             return []
-        
+
         command = self.valid_tokens[tokens[0]]
         return command.exec(tokens[1:])
 
