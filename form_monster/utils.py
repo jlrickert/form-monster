@@ -1,23 +1,31 @@
 import os
 import re
+import logging
+import subprocess
+import sys
 
-_unix_shell_re = re.compile(r"(sh|zsh|bash)")
-_windows_shell_re = re.compile(r"")
+log = logging.getLogger()
+
+UNIX_SHELL_RE = re.compile(r".*(sh|zsh|bash).*")
+WINDOWS_SHELL_RE = re.compile(r".*(PS).*")
 
 
-def _get_shell_type():
+def get_current_environment():
     shell_var = os.environ.get("SHELL", "")
-    if _unix_shell_re.match(shell_var):
+    if UNIX_SHELL_RE.match(shell_var):
         return "unix"
-    elif _windows_shell_re(shell_var):
+    elif WINDOWS_SHELL_RE.match(shell_var):
         return "windows"
+    else:
+        log.warn("Unable to detect working environment")
 
 
-_shell = _get_shell_type()
+environment = get_current_environment()
 
 
 def clear_screan():
-    if _shell is ["unix"]:
-        os.system("clear")
-    if _shell in ["windows"]:
+    if environment in ["unix"]:
+        sys.stderr.write("\x1b[2J\x1b[H")
+        # os.system("clear")
+    if current_shell in ["windows"]:
         os.system("cls")

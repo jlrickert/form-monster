@@ -29,7 +29,8 @@ NAME = "form_monster"
 VERSION = find_value(
     read_file(os.path.join(NAME, "__init__.py")), "__version__")
 INSTALL_REQUIRES = []
-DESCRIPTION, LONG_DESCRIPTION = read_description('README.md')
+DESCRIPTION = "Declaratively create forms on the console, desktop, or web"
+LONG_DESCRIPTION = read_file('README.md')
 LICENSE = read_file("LICENSE")
 
 setup(
@@ -37,14 +38,16 @@ setup(
     version=VERSION,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/markdown",
     author="Jared Rickert",
     author_email="jaredrickert52@gmail.com",
-    license=LICENSE,
+    license='MIT',
     setup_requires=["pytest-runner"],
+    python_requires=">=3",
     install_requires=INSTALL_REQUIRES,
     tests_require=["pytest"],
-    packages=find_packages(exclude=["*.test"]),
-    url="https://github.com/jlrickert/form_monster",
+    packages=find_packages(exclude=["test*"]),
+    url="https://github.com/jlrickert/form-monster",
     # download_url="https://pypi.python.org/pypi/form_monster",
 
     # see classifiers:

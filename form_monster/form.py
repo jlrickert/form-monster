@@ -2,7 +2,7 @@ from .utils import clear_screan
 from .command import SetCommand
 
 
-class FormMonster(object):
+class Form(object):
     valid_tokens = {
         "set": {
             "arity": 2,
