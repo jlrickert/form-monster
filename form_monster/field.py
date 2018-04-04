@@ -6,36 +6,60 @@ log = logging.getLogger()
 
 
 class Field(object):
-    def __init__(self, name, form={}, options={}):
+    def __init__(self, name, dependencies=[], options={}):
         self._name = name
-        self.form = form
+        self._dep_fields = {field.name: field for field in dependencies}
         self._value = None
         self._options = options
-        self._check_properties()
 
-    def _check_properties(self):
+    def check_properties(self):
+        """Ensures the the field is logically correct"""
+        is_ok = True
+        is_ok = is_ok and self._check_text_field()
+        is_ok = is_ok and self._check_type()
+        is_ok = is_ok and self._check_validate_func()
+        is_ok = is_ok and self._check_compute_func()
+        return is_ok
+
+    def _check_text_field(self):
         if self._options.get("text", None) is None:
             log.warn('"text" is not set for field %s' % self.name)
+            return False
+        return True
+
+    def _check_type(self):
         if self.type_ not in [str, bool, date, datetime, int, float]:
             log.warn("%s is not a supported type for field %s" % self.type_,
                      self.name)
+            return False
+        return True
 
+    def _check_validate_func(self):
         ok = True
         try:
             spec = inspect.getargspec(self._validate)
             ok = len(spec.args) >= 1
         except TypeError:
             ok = False
+
         if not ok:
             log.warn("\"validate\" function for field %s expecting 1 argument"
                      % self.name)
+        return ok
 
+    def _check_compute_func(self):
+        ok = True
         if self._compute is not None:
-            spec = inspect.getargspec(self._compute)
-            for arg in spec.args:
-                dep = self._options.get(arg, None)
+            for arg in self.get_dependencies():
+                dep = self._dep_fields.get(arg, None)
                 if dep is None:
-                    log.warn("Field %s is not defined. Needed by field %s" % (dep, self.name))
+                    ok = False
+                    log.warn("Field %s is not defined. Needed by field %s" %
+                             (dep, self.name))
+        return ok
+
+    def add_dependency(self, field):
+        self._dep_fields[field.name] = field
 
     @property
     def name(self):
@@ -69,6 +93,12 @@ class Field(object):
         else:
             return get_msg(self.value)
 
+    def get_dependencies(self):
+        if self._compute is None:
+            return []
+        spec = inspect.getargspec(self._compute)
+        return spec.args
+
     @property
     def _compute(self):
         return self._options.get("compute", None)
@@ -87,10 +117,9 @@ class Field(object):
     @property
     def value(self):
         if self._compute is not None:
-            spec = inspect.getargspec(self._compute)
             args = []
-            for field_name in spec.args:
-                dep = self.form.get(field_name)
+            for field_name in self.get_dependencies():
+                dep = self._dep_fields.get(field_name)
                 args.append(dep.value)
             return self._compute(*args)
         if self._value:

@@ -11,23 +11,34 @@ log = logging.getLogger()
 
 class Form(object):
     def __init__(self, form_data):
-        is_ordered = type(form_data) is OrderedDict or sys.version_info >= (3,6)
-        if not is_ordered:
-            log.warn("Form data is not an OrderedDict and order may not be perserved")
+        self._check_for_ordered_dict(form_data)
         self.fields = self._init_fields(form_data)
+
+    def _check_for_ordered_dict(self, d):
+        is_supported_python = sys.version_info >= (3, 6)
+        is_dict = type(d) is dict
+        is_ordered_dict = type(d) is OrderedDict
+        is_ordered = is_ordered_dict or (is_dict and is_supported_python)
+        if not is_ordered:
+            log.warn(
+                "Form data is not an OrderedDict and order may not be perserved"
+            )
 
     def _init_fields(self, form_data):
         fields = OrderedDict()
         for key, value in form_data.items():
-            fields[key] = Field(key, form=self, options=value)
+            fields[key] = Field(key, options=value)
+        for field in fields.values():
+            for dep in field.get_dependencies():
+                dep_field = fields.get(dep, None)
+                if dep_field is not None:
+                    field.add_dependency(dep_field)
+            field.check_properties()
         return fields
 
-    def get_field(self, key):
-        return self.fields[key]
-
-    def get(self, key, _=None):
+    def get(self, key, default=None):
         """Alias to get_field"""
-        return self.get_field(key)
+        return self.fields(key, default)
 
     def set(self, key, value):
         self.fields[key].value = value

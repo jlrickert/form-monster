@@ -36,33 +36,30 @@ def cost_range_field():
 
 @pytest.fixture
 def compute_form():
-    form = {}
-    cat_count = Field(
-        "cat_count",
-        form=form,
-        options={
+    forms = {
+        "cat_count":
+        Field("cat_count", options={
             "text": "Number of cats",
             "type": int,
-        })
-    dog_count = Field(
-        "dog_count",
-        form=form,
-        options={
+        }),
+        "dog_count":
+        Field("dog_count", options={
             "text": "Number of dogs",
             "type": int,
         })
-    total_legs = Field(
+    }
+    forms["total_legs"] = Field(
         "total_legs",
-        form=form,
+        dependencies=[
+            forms.get("dog_count"),
+            forms.get("cat_count"),
+        ],
         options={
             "text": "Total legs",
             "type": int,
             "compute": computeTotalLegs,
         })
-    form[dog_count.name] = dog_count
-    form[cat_count.name] = cat_count
-    form[total_legs.name] = total_legs
-    return form
+    return forms
 
 
 class TestMinimumField(object):

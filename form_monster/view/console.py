@@ -1,5 +1,7 @@
+from .abstract_view import AbstractView
 
-class Console(object):
+
+class Console(AbstractView):
     pass
 
 
