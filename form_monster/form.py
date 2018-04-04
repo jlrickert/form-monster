@@ -1,87 +1,39 @@
+import logging
+import sys
+from collections import OrderedDict
+
 from .utils import clear_screan
 from .command import SetCommand
+from .field import Field
+
+log = logging.getLogger()
 
 
 class Form(object):
-    valid_tokens = {
-        "set": {
-            "arity": 2,
-            "command": SetCommand
-        },
-        "get": {
-            "arity": 2
-        },
-        "page": {
-            "arity": 1
-        },
-        "complete": {
-            "arity": 0
-        },
-        "DEFAULT": {
-            "arity": 0
-        }
-    }
-
     def __init__(self, form_data):
-        self.__raw = form_data
-        self.values = ['' for x in list(form_data.keys())]
-        self.complete = False
+        is_ordered = type(form_data) is OrderedDict or sys.version_info >= (3,6)
+        if not is_ordered:
+            log.warn("Form data is not an OrderedDict and order may not be perserved")
+        self.fields = self._init_fields(form_data)
 
-    def set_value(self, key, value):
-        self.values[key] = value
+    def _init_fields(self, form_data):
+        fields = OrderedDict()
+        for key, value in form_data.items():
+            fields[key] = Field(key, form=self, options=value)
+        return fields
 
-    def gui(self):
-        errors = []
-        while not self.complete:
-            clear_screan()
-            self.__print_forms()
+    def get_field(self, key):
+        return self.fields[key]
 
-            if errors:
-                print(errors)
+    def get(self, key, _=None):
+        """Alias to get_field"""
+        return self.get_field(key)
 
-            raw_string = self.__prompt()
-            ast, errors = self.__parse(raw_string)
+    def set(self, key, value):
+        self.fields[key].value = value
 
-            if errors:
-                print(errors)
-                continue
-
-            errors = self.__eval(ast)
-
-            if errors:
-                print(errors)
-
-            clear_screan()
-
-    def __prompt(self):
-        return input(">>> ")
-
-    def __parse(self, raw_str):
-        tokens = [s for s in raw_str.strip().split(" ") if s != ""]
-        errors = []
-
-        if len(tokens) == 0:
-            return ((), errors)
-
-        command_name = tokens[0]
-
-        try:
-            command = self.valid_tokens[command_name]
-            args = tokens[1:]
-            if len(args) < command["arity"]:
-                errors.append("Invalid arity")
-        except KeyError:
-            errors.append("{} is not a valid command".format(command_name))
-
-        return ([command] + args, errors)
-
-    def __eval(self, tokens):
-        if tokens:
-            return []
-
-        command = self.valid_tokens[tokens[0]]
-        return command.exec(tokens[1:])
-
-    def __print_forms(self):
-        for i, key in enumerate(self.__raw):
-            print("[{}] {} {}".format(i, key, self.values[i]))
+    def is_valid(self):
+        for key, value in self.fields.items():
+            if not value.is_valid():
+                return False
+        return True
