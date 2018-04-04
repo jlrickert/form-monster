@@ -79,8 +79,9 @@ class TestMinimumField(object):
         assert minimal_field.value == "Jack"
 
     def test_default_is_valid(self, minimal_field):
-        minimal_field.set_value = 5
-        assert minimal_field.is_valid() is False
+        assert minimal_field.is_valid() is True
+        minimal_field.value = "5"
+        assert minimal_field.is_valid() is True
 
     def test_error_msg(self, minimal_field):
         msg = minimal_field.error_msg()

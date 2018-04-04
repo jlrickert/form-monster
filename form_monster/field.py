@@ -20,10 +20,9 @@ class Field(object):
             log.warn("%s is not a supported type for field %s" % self.type_,
                      self.name)
 
-        validate = self._options.get("validate", lambda x: True)
         ok = True
         try:
-            spec = inspect.getargspec(validate)
+            spec = inspect.getargspec(self._validate)
             ok = len(spec.args) >= 1
         except TypeError:
             ok = False
@@ -31,13 +30,12 @@ class Field(object):
             log.warn("\"validate\" function for field %s expecting 1 argument"
                      % self.name)
 
-        compute = self._options.get("compute", None)
-        if compute is not None:
-            spec = inspect.getargspec(validate)
+        if self._compute is not None:
+            spec = inspect.getargspec(self._compute)
             for arg in spec.args:
                 dep = self._options.get(arg, None)
                 if dep is None:
-                    log.warn("Field %s is not defined" % dep)
+                    log.warn("Field %s is not defined. Needed by field %s" % (dep, self.name))
 
     @property
     def name(self):
@@ -52,10 +50,11 @@ class Field(object):
         return self._options.get("type", str)
 
     def is_valid(self):
-        if type(self.value) is not self.type_:
+        if self._optional and self.value is None:
+            return True
+        elif type(self.value) is not self.type_:
             return False
-        validate = self._options.get("validate", lambda x: True)
-        return validate(self.value)
+        return self._validate(self.value)
 
     def error_msg(self):
         msg = ""
@@ -76,7 +75,14 @@ class Field(object):
 
     @property
     def _validate(self):
-        return self._options.get("validate", None)
+        return self._options.get("validate", lambda x: True)
+
+    @property
+    def _optional(self):
+        is_optional = self._options.get("optional", None)
+        is_nullable = self._options.get("nullable", None)
+        return (is_optional is None and is_nullable is None
+                ) or is_optional is True or is_nullable is True
 
     @property
     def value(self):
