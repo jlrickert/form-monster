@@ -14,6 +14,8 @@ class Field(object):
         self._check_properties()
 
     def _check_properties(self):
+        if self._options.get("text", None) is None:
+            log.warn('"text" is not set for field %s' % self.name)
         if self.type_ not in [str, bool, date, datetime, int, float]:
             log.warn("%s is not a supported type for field %s" % self.type_,
                      self.name)
@@ -49,19 +51,24 @@ class Field(object):
     def type_(self):
         return self._options.get("type", str)
 
-    @property
     def is_valid(self):
+        if type(self.value) is not self.type_:
+            return False
         validate = self._options.get("validate", lambda x: True)
         return validate(self.value)
 
-    @property
-    def error_msg(self, value):
-        msg = "%s is invalid for field %s" % value, self.name
-        get_msg = self._options.get("error_msg", msg)
-        if get_msg is str:
+    def error_msg(self):
+        msg = ""
+        if self.value is not None:
+            msg = "%s is invalid for field %s" % (self.value, self.name)
+            get_msg = self._options.get("error_msg", msg)
+        else:
+            get_msg = 'Field "%s" is missing a value' % self.name
+
+        if type(get_msg) is str:
             return get_msg
         else:
-            return get_msg(value)
+            return get_msg(self.value)
 
     @property
     def _compute(self):
@@ -87,7 +94,7 @@ class Field(object):
     @value.setter
     def value(self, value):
         """
-        for date convert a year/month/date to 20130324 ex. 19930324 is 1993/03/24
+        For date convert a year/month/date to 20130324 ex. 19930324 is 1993/03/24
         """
         if self.type_ is date:
             self._value = datetime.strptime(value, "%Y%m%d").date()
