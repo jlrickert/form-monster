@@ -31,7 +31,6 @@ VERSION = find_value(
 INSTALL_REQUIRES = []
 DESCRIPTION = "Declaratively create forms on the console, desktop, or web"
 LONG_DESCRIPTION = read_file('README.md')
-LICENSE = read_file("LICENSE")
 
 setup(
     name=NAME,
@@ -43,10 +42,10 @@ setup(
     author_email="jaredrickert52@gmail.com",
     license='MIT',
     setup_requires=["pytest-runner"],
-    python_requires=">=3",
-    install_requires=INSTALL_REQUIRES,
+    python_requires=">=3.5",
+    install_requires=["aiohttp>=3.1"],
     tests_require=["pytest"],
-    packages=find_packages(exclude=["test*"]),
+    packages=find_packages(),
     url="https://github.com/jlrickert/form-monster",
     # download_url="https://pypi.python.org/pypi/form_monster",
 

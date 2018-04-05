@@ -1,42 +1,49 @@
+import logging
 from datetime import datetime, date
-from form_monster import Form, Console
+from form_monster import Form, Web
+
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger()
+
+def compute_over_18(date_of_birth):
+    if date_of_birth:
+        return (date.now() - date_of_birth).years >= 18
 
 form = Form({
     # minimum needed
-    'first_name': {
-        "name": "First Name",
+    "first_text": {
+        "text": "First Name",
+        "optional": False,
     },
 
     # defaults
-    'last_name': {
-        # name is required
-        "name": "Last Name",
+    "last_text": {
+        # text is required
+        "text": "Last Name",
 
         # str is default
-        'type': str,                 
-        optional: False,
-        'validate': lambda x: True,
-        'error_msg': lambda value: "%s is invalid for field %s" % value
+        "type": str,
+        "optional": False,
+        "validate": lambda x: True,
+        "error_msg": lambda value: "%s is invalid for field %s" % value
     },
     'date_of_birth': {
-        "name": "Date of Birth",
+        "text": "Date of Birth",
         "type": date,
         "validate": lambda x: x <= date.now()
     },
 
     # example calculated value.
-    'over_18': {
-        "name": "Over 18",
-        'type': bool,
+    "over_18": {
+        "text": "Over 18",
+        "type": bool,
+        "optional": False,
 
-        #example that will default to making sure it is a bool
-        calculate: lambda dob: (date.now() - dob).years >= 18,
-
-        # Only calculated if all depencies have values. Not required
-        depencies: ["date_of_birth"]
+        # calculates a value when all arguments are valid.
+        "compute": compute_over_18,
     }
 })
 
-# view = Console(form)
-# view.run()
-# print(view.data)
+view = Web(form)
+view.run()
+print(view.data)

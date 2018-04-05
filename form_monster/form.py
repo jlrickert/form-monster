@@ -6,7 +6,7 @@ from .utils import clear_screan
 from .command import SetCommand
 from .field import Field
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class Form(object):

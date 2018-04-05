@@ -2,7 +2,7 @@ from datetime import datetime, date
 import inspect
 import logging
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class Field(object):
