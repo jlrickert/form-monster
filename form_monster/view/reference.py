@@ -214,6 +214,7 @@ class FieldWidget():
     def controller(self):
         return self.textCtrl
 
+
 class FormWindow(wx.Frame):
     def __init__(self, form):
         super().__init__(None, title="Form Monster")
@@ -255,3 +256,142 @@ class FormWindow(wx.Frame):
 
     def _onSubmit(self, event):
         self.Close(True)
+
+
+class FieldValueWidget(object):
+    def __init__(self, parent=None, field=None, sizer=None):
+        self._field = field
+        self.static_text = wx.StaticText(parent, wx.ID_ANY, self._field.text,
+                                         wx.DefaultPosition, wx.DefaultSize, 0)
+        self.static_text.Wrap(-1)
+        self.is_valid = field.is_valid
+        value = field.value
+        if value is None:
+            value = ""
+        self.text_controller = wx.TextCtrl(parent, wx.ID_ANY,
+                                           value, wx.DefaultPosition,
+                                           wx.Size(-1, -1), 0)
+        sizer.Add(self.static_text, 0, wx.ALL, 5)
+        sizer.Add(self.text_controller, 1, wx.ALL | wx.EXPAND, 5)
+
+    def onTextUpdaate(self, event):
+        self._field.value = event.getStrring()
+        self.is_valid = field.is_valid
+        if self.is_valid:
+            self.text_controller.SetBackgroundColour(wx.Colour(255, 0, 0))
+        else:
+            self.text_controller.SetBackgroundColour(wx.Colour(127, 127, 0))
+
+
+class FMFrame(wx.Frame):
+    def __init__(self, form, parent=None):
+        super().__init__(
+            parent,
+            id=wx.ID_ANY,
+            title=wx.EmptyString,
+            pos=wx.DefaultPosition,
+            size=wx.Size(500, 300),
+            style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
+        self.SetSizeHints(wx.DefaultSize, wx.DefaultSize)
+        gridWrapper = wx.BoxSizer(wx.VERTICAL)
+
+        self.grid = wx.ScrolledWindow(self, wx.ID_ANY, wx.DefaultPosition,
+                                      wx.DefaultSize, wx.HSCROLL | wx.VSCROLL)
+        self.grid.SetScrollRate(5, 5)
+        gridSizer = self._init_grid_sizer()
+
+        for field in form.fields:
+            FieldValueWidget(parent=self.grid, field=field, sizer=gridSizer)
+
+        self.m_staticText1 = wx.StaticText(
+            self.grid, wx.ID_ANY, u"MyLabel sadfdsafasdf ", wx.DefaultPosition,
+            wx.DefaultSize, 0)
+        self.m_staticText1.Wrap(-1)
+        gridSizer.Add(self.m_staticText1, 0, wx.ALL, 5)
+
+        self.m_textCtrl1 = wx.TextCtrl(
+            self.grid, wx.ID_ANY,
+            u"asdfsffsadfsd safd d fas dfdasfsadfsadfasf", wx.DefaultPosition,
+            wx.Size(-1, -1), 0)
+        self.m_textCtrl1.SetBackgroundColour(wx.Colour(255, 0, 0))
+
+        gridSizer.Add(self.m_textCtrl1, 1, wx.ALL | wx.EXPAND, 5)
+
+        self.m_staticText2 = wx.StaticText(self.grid, wx.ID_ANY, u"MyLabel",
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           0)
+        self.m_staticText2.Wrap(-1)
+        gridSizer.Add(self.m_staticText2, 0, wx.ALL, 5)
+
+        self.m_textCtrl2 = wx.TextCtrl(self.grid, wx.ID_ANY, wx.EmptyString,
+                                       wx.DefaultPosition, wx.DefaultSize, 0)
+        gridSizer.Add(self.m_textCtrl2, 0, wx.ALL, 5)
+
+        self.m_staticText3 = wx.StaticText(self.grid, wx.ID_ANY, u"MyLabel",
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           0)
+        self.m_staticText3.Wrap(-1)
+        gridSizer.Add(self.m_staticText3, 0, wx.ALL, 5)
+
+        self.m_checkBox1 = wx.CheckBox(self.grid, wx.ID_ANY, u"Check Me!",
+                                       wx.DefaultPosition, wx.DefaultSize, 0)
+        self.m_checkBox1.Enable(False)
+
+        gridSizer.Add(self.m_checkBox1, 0, wx.ALL, 5)
+
+        self.m_staticText4 = wx.StaticText(self.grid, wx.ID_ANY, u"MyLabel",
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           0)
+        self.m_staticText4.Wrap(-1)
+        gridSizer.Add(self.m_staticText4, 0, wx.ALL, 5)
+
+        self.m_checkBox2 = wx.CheckBox(self.grid, wx.ID_ANY, u"Check Me!",
+                                       wx.DefaultPosition, wx.DefaultSize, 0)
+        gridSizer.Add(self.m_checkBox2, 0, wx.ALL, 5)
+
+        self.m_staticText5 = wx.StaticText(self.grid, wx.ID_ANY, u"MyLabel",
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           0)
+        self.m_staticText5.Wrap(-1)
+        gridSizer.Add(self.m_staticText5, 0, wx.ALL, 5)
+
+        m_choice1Choices = ["a", "b", "c"]
+        self.m_choice1 = wx.Choice(self.grid, wx.ID_ANY, wx.DefaultPosition,
+                                   wx.DefaultSize, m_choice1Choices, 0)
+        self.m_choice1.SetSelection(-1)
+        gridSizer.Add(self.m_choice1, 0, wx.ALL, 5)
+
+        self.grid.SetSizer(gridSizer)
+        self.grid.Layout()
+        gridSizer.Fit(self.grid)
+        gridWrapper.Add(self.grid, 1, wx.EXPAND | wx.ALL, 5)
+
+        self.submit_button = wx.Button(self, wx.ID_ANY, u"MyButton",
+                                       wx.DefaultPosition, wx.DefaultSize, 0)
+        gridWrapper.Add(self.submit_button, 0, wx.ALIGN_RIGHT | wx.ALL, 5)
+
+        self.SetSizer(gridWrapper)
+        self.Layout()
+
+        self.Centre(wx.BOTH)
+
+        # Connect Events
+        self.m_textCtrl1.Bind(wx.EVT_TEXT, self.onTextUpdate)
+        self.submit_button.Bind(wx.EVT_BUTTON, self.on_submit)
+
+    def __del__(self):
+        pass
+
+    def _init_grid_sizer(self):
+        sizer = wx.FlexGridSizer(0, 2, 5, 0)
+        sizer.SetFlexibleDirection(wx.BOTH)
+        sizer.SetNonFlexibleGrowMode(wx.FLEX_GROWMODE_SPECIFIED)
+        return sizer
+
+    # Virtual event handlers, overide them in your derived class
+    def onTextUpdate(self, event):
+        event.Skip()
+
+    def on_submit(self, event):
+        event.Skip()
+        self.Close()

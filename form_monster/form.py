@@ -45,7 +45,7 @@ class Form(object):
 
     @property
     def fields(self):
-        return self._fields.values()
+        return list(self._fields.values())
 
     def is_valid(self):
         for value in self.fields:
