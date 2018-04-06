@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 class Form(object):
     def __init__(self, form_data):
         self._check_for_ordered_dict(form_data)
-        self.fields = self._init_fields(form_data)
+        self._fields = self._init_fields(form_data)
 
     def _check_for_ordered_dict(self, d):
         is_supported_python = sys.version_info >= (3, 6)
@@ -33,18 +33,22 @@ class Form(object):
                 dep_field = fields.get(dep, None)
                 if dep_field is not None:
                     field.add_dependency(dep_field)
-            field.check_properties()
+            ok = field.check_properties()
         return fields
 
     def get(self, key, default=None):
         """Alias to get_field"""
-        return self.fields(key, default)
+        return self._fields(key, default)
 
     def set(self, key, value):
-        self.fields[key].value = value
+        self._fields[key].value = value
+
+    @property
+    def fields(self):
+        return self._fields.values()
 
     def is_valid(self):
-        for key, value in self.fields.items():
+        for value in self.fields:
             if not value.is_valid():
                 return False
         return True

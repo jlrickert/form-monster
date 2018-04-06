@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, date
-from form_monster import Form, Web
+from form_monster import Form, Web, WxView
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger()
@@ -44,6 +44,6 @@ form = Form({
     }
 })
 
-view = Web(form)
-view.run()
-print(view.data)
+view = WxView(form)
+data = view.run()
+print(data)

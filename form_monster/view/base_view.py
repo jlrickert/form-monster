@@ -1,4 +1,4 @@
-class AbstractView(object):
+class BaseView(object):
     def __init__(self, form):
         self.form = form
 

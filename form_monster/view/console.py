@@ -1,7 +1,7 @@
-from .abstract_view import AbstractView
+from .base_view import BaseView
 
 
-class Console(AbstractView):
+class Console(BaseView):
     pass
 
 

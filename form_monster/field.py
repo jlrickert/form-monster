@@ -100,21 +100,6 @@ class Field(object):
         return spec.args
 
     @property
-    def _compute(self):
-        return self._options.get("compute", None)
-
-    @property
-    def _validate(self):
-        return self._options.get("validate", lambda x: True)
-
-    @property
-    def _optional(self):
-        is_optional = self._options.get("optional", None)
-        is_nullable = self._options.get("nullable", None)
-        return (is_optional is None and is_nullable is None
-                ) or is_optional is True or is_nullable is True
-
-    @property
     def value(self):
         if self._compute is not None:
             args = []
@@ -137,3 +122,18 @@ class Field(object):
             self._value = datetime.strptime(value, "%Y%m%d")
         else:
             self._value = self.type_(value)
+
+    @property
+    def _compute(self):
+        return self._options.get("compute", None)
+
+    @property
+    def _validate(self):
+        return self._options.get("validate", lambda x: True)
+
+    @property
+    def _optional(self):
+        is_optional = self._options.get("optional", None)
+        is_nullable = self._options.get("nullable", None)
+        return (is_optional is None and is_nullable is None
+                ) or is_optional is True or is_nullable is True
