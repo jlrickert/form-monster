@@ -57,6 +57,6 @@ class TestSimpleform():
     def test_form_order(self, form1):
         names = ["first_text", "last_text", "date_of_birth", "over_18"]
         i = 0
-        for key in form1.fields:
-            assert names[i] == key
+        for field in form1.fields:
+            assert names[i] == field.name
             i += 1

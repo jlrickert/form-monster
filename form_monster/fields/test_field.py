@@ -1,7 +1,7 @@
 import pytest
 import re
 
-from form_monster.field import Field
+from .field import Field
 
 
 def computeTotalLegs(cat_count, dog_count):

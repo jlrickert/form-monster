@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from .utils import clear_screan
 from .command import SetCommand
-from .field import Field
+from .fields import Field
 
 log = logging.getLogger(__name__)
 

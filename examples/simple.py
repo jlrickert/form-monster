@@ -7,12 +7,13 @@ log = logging.getLogger()
 
 def compute_over_18(date_of_birth):
     if date_of_birth:
-        return (date.now() - date_of_birth).years >= 18
+        return (date.today() - date_of_birth).days >= 18 * 365.25
 
 form = Form({
     # minimum needed
     "first_text": {
         "text": "First Name",
+        "validate": lambda v: v == "jack",
         "optional": False,
     },
 
@@ -23,14 +24,15 @@ form = Form({
 
         # str is default
         "type": str,
-        "optional": False,
+        "optional": True,
         "validate": lambda x: True,
         "error_msg": lambda value: "%s is invalid for field %s" % value
     },
-    'date_of_birth': {
+
+    "date_of_birth": {
         "text": "Date of Birth",
         "type": date,
-        "validate": lambda x: x <= date.now()
+        "validate": lambda x: x <= datetime.now().date()
     },
 
     # example calculated value.

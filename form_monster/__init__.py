@@ -11,4 +11,4 @@ __doc__ = __doc__.format(version=__version__)
 
 from .form import Form
 from .view import *
-from .field import Field
+from .fields import *
