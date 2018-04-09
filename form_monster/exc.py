@@ -1,5 +1,8 @@
 class BaseErr(Exception):
     pass
 
-class InvalidValueErr(BaseErr):
+class ValueErr(BaseErr):
+    pass
+
+class TypeErr(BaseErr):
     pass
