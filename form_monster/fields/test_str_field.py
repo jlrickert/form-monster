@@ -60,3 +60,8 @@ class TestComputed():
         last = full_name.get_value()
         full_name.set_value("rawr")
         assert full_name.get_value() == last
+
+    def test_valid(self, first_name, last_name, full_name):
+        first_name.set_value("Aaron")
+        last_name.set_value("Abraham")
+        assert full_name.get_value() == "Aaron Abraham"

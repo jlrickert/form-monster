@@ -3,8 +3,6 @@ from ..exc import ValueErr
 
 
 class BaseField():
-    _IDENTITY = None
-
     def __init__(self,
                  text,
                  optional=True,
@@ -28,9 +26,9 @@ class BaseField():
         return True
 
     def is_valid(self):
-        return self.validate(self._value)
+        return self.validate(self.get_value())
 
-    def get_value(self, default=object()):
+    def get_value(self, default=object):
         if self.compute:
             return self._get_computed_value()
 
@@ -42,7 +40,7 @@ class BaseField():
         return self._value
 
     def _get_computed_value(self):
-        deps = [dep.get_value(dep._IDENTITY) for dep in self.dependencies]
+        deps = [dep.get_value(None) for dep in self.dependencies]
         return self.compute(*deps)
 
     def set_value(self, value):
