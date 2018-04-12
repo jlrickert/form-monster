@@ -1,5 +1,4 @@
 from .base import BaseField
-
 from ..exc import ValueErr
 
 

@@ -59,7 +59,7 @@ class TestValidation():
         assert cat_legs.is_valid() is True
 
     def test_custom_validate(self, cow_legs):
-        assert cow_legs.is_valid() is False
+        assert cow_legs.is_valid() is True
 
         cow_legs.set_value(13)
         assert cow_legs.is_valid() is False

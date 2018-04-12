@@ -3,7 +3,6 @@ import sys
 from collections import OrderedDict
 
 from .utils import clear_screan
-from .command import SetCommand
 from .fields import Field
 
 log = logging.getLogger(__name__)

@@ -150,7 +150,4 @@ class Field(object):
 
     @property
     def _optional(self):
-        is_optional = self._options.get("optional", None)
-        is_nullable = self._options.get("nullable", None)
-        return (is_optional is None and is_nullable is None
-                ) or is_optional is True or is_nullable is True
+        return self._options.get("optional", None)

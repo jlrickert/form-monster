@@ -3,4 +3,5 @@ from .base import BaseField
 
 
 class BoolField(BaseField):
-    pass
+    def set_values(self, value):
+        super().set_value(bool(value))

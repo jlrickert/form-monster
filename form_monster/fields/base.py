@@ -5,10 +5,11 @@ from ..exc import ValueErr
 class BaseField():
     def __init__(self,
                  text,
-                 optional=True,
+                 optional=None,
                  compute=None,
                  dependencies=[],
                  validate=None):
+        """`optional` option is ignored if `validate` is not none"""
         self._value = None
         self.text = text
         self.optional = optional
@@ -17,12 +18,14 @@ class BaseField():
         self._validate = validate
 
     def validate(self, value):
+        if self._validate:
+            return self._validate(value)
+
         must_have_value = self.optional is False
         value_is_none = self._value is None
         if must_have_value and value_is_none:
             return False
-        if self._validate:
-            return self._validate(value)
+
         return True
 
     def is_valid(self):

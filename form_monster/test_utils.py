@@ -1,4 +1,4 @@
-from form_monster.utils import UNIX_SHELL_RE, WINDOWS_SHELL_RE
+from .utils import UNIX_SHELL_RE, WINDOWS_SHELL_RE
 
 
 def test_unix_shell_regex():
