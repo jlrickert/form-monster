@@ -11,12 +11,12 @@ def is_multiple_of_4(*animals):
 
 @pytest.fixture
 def dog_legs():
-    return IntField("Number of dog legs")
+    return IntField("Number of dog legs", optional=True)
 
 
 @pytest.fixture
 def cat_legs():
-    return IntField("Number of cat legs", optional=False)
+    return IntField("Number of cat legs")
 
 
 @pytest.fixture
@@ -53,14 +53,16 @@ class TestValidation():
     def test_defaults(self, dog_legs):
         assert dog_legs.is_valid() is True
 
-    def test_optional(self, cat_legs):
+    def test_optional(self, cat_legs, dog_legs):
+        assert dog_legs.is_valid() is True
+        dog_legs.set_value(4)
+        assert dog_legs.is_valid() is True
+
         assert cat_legs.is_valid() is False
         cat_legs.set_value(0)
         assert cat_legs.is_valid() is True
 
     def test_custom_validate(self, cow_legs):
-        assert cow_legs.is_valid() is True
-
         cow_legs.set_value(13)
         assert cow_legs.is_valid() is False
 

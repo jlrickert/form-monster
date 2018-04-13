@@ -15,7 +15,8 @@ class DateField(BaseField):
         elif value is None:
             self._value = value
         else:
-            super().set_value(self.__parse_date(value))
+            d = self.__parse_date(value)
+            super().set_value(d)
 
     def __is_a_date(self, value):
         has_year = hasattr(value, "year")
@@ -26,8 +27,11 @@ class DateField(BaseField):
     def __parse_date(self, value):
         formats = [
             "%m/%d/%Y", "%m-%d-%Y", "%m %d %y", "%b, %d, %Y", "%B, %d, %Y",
-            "%Y%m%d", "%Y-%m-%d", "%Y/%m/%d"
+            "%B %d %Y", "%b %d %Y", "%Y%m%d", "%Y-%m-%d", "%Y/%m/%d"
         ]
         for fmt in formats:
-            pass
-        pass
+            try:
+                return datetime.strptime(value, fmt).date()
+            except ValueError:
+                pass
+        raise ValueErr("time data %s is not properly formatted" % value)

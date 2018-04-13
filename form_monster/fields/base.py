@@ -4,32 +4,36 @@ from ..exc import ValueErr
 
 class BaseField():
     def __init__(self,
-                 text,
-                 optional=None,
+                 text=None,
+                 optional=False,
                  compute=None,
                  dependencies=[],
-                 validate=None):
+                 validate=None,
+                 choices=None):
         """`optional` option is ignored if `validate` is not none"""
         self._value = None
         self.text = text
         self.optional = optional
         self.compute = compute
         self.dependencies = dependencies
+        self.choices = choices
         self._validate = validate
 
     def validate(self, value):
         if self._validate:
             return self._validate(value)
-
-        must_have_value = self.optional is False
-        value_is_none = self._value is None
-        if must_have_value and value_is_none:
-            return False
-
         return True
 
     def is_valid(self):
-        return self.validate(self.get_value())
+        if self.choices is not None and self.get_value in self.choices:
+            return True
+
+        value = self.get_value()
+        if not self.optional and value is None:
+            return False
+        elif value is None:
+            return True
+        return self.validate(value)
 
     def get_value(self, default=object):
         if self.compute:

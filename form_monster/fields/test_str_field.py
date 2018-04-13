@@ -6,18 +6,18 @@ from ..exc import ValueErr
 
 @pytest.fixture
 def first_name():
-    return StrField("First Name")
+    return StrField("First Name", optional=True)
 
 
 @pytest.fixture
 def last_name():
-    return StrField("Last Name", optional=False)
+    return StrField("Last Name")
 
 
 @pytest.fixture
 def signature():
     return StrField(
-        "Signature", optional=False, validate=lambda name: name == "Jack")
+        "Signature", validate=lambda name: name == "Jack")
 
 
 @pytest.fixture

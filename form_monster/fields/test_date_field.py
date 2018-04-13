@@ -30,20 +30,38 @@ def date_of_birth():
 
 
 @pytest.fixture
+def expiration_date():
+    return DateField("April Fools Date", optional=True)
+
+
+@pytest.fixture
 def over_18(date_of_birth):
     return BoolField("Over 18", dependencies=[over_18], compute=is_over_18)
 
 
 class TestValidation():
     def test_invalid(self, date_of_birth):
-        assert date_of_birth.is_valid() is True
-
         future = (datetime.now() + timedelta(days=1)).date()
         date_of_birth.set_value(future)
         assert date_of_birth.is_valid() is False
 
     def test_valid(self, date_of_birth):
+        date_of_birth.set_value("March 24 1992")
         assert date_of_birth.is_valid() is True
+
+        date_of_birth.set_value("19920324")
+        assert date_of_birth.is_valid() is True
+
+    def test_optional(self, date_of_birth, expiration_date):
+        assert date_of_birth.is_valid() is False
+        dob = (datetime.now() - timedelta(days=(5 + 22 * 365))).date()
+        date_of_birth.set_value(dob)
+        assert date_of_birth.is_valid() is True
+
+        assert expiration_date.is_valid() is True
+        expire_date = (datetime.now() + timedelta(days=7)).date()
+        expiration_date.set_value(expire_date)
+        assert expiration_date.is_valid() is True
 
 
 class TestValueHandling():
@@ -52,4 +70,17 @@ class TestValueHandling():
             date_of_birth.set_value("rofl")
             assert "Should have thrown an error"
         except ValueErr as e:
-            assert e is "rawr"
+            pass
+
+    def test_set_valid_value(self, date_of_birth):
+        date_of_birth.set_value("Mar 24 1992")
+        value = date_of_birth.get_value()
+        assert value == date(1992, 3, 24)
+
+        date_of_birth.set_value("March 24 1992")
+        value = date_of_birth.get_value()
+        assert value == date(1992, 3, 24)
+
+        date_of_birth.set_value("19920324")
+        value = date_of_birth.get_value()
+        assert value == date(1992, 3, 24)
