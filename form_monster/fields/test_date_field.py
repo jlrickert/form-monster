@@ -36,7 +36,7 @@ def expiration_date():
 
 @pytest.fixture
 def over_18(date_of_birth):
-    return BoolField("Over 18", dependencies=[over_18], compute=is_over_18)
+    return BoolField("Over 18", dependencies=[date_of_birth], compute=is_over_18)
 
 
 class TestValidation():
@@ -45,7 +45,8 @@ class TestValidation():
         date_of_birth.set_value(future)
         assert date_of_birth.is_valid() is False
 
-    def test_valid(self, date_of_birth):
+    def test_valid(self, date_of_birth, over_18):
+        assert over_18.is_valid() is False
         date_of_birth.set_value("March 24 1992")
         assert date_of_birth.is_valid() is True
 

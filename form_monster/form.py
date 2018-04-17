@@ -1,69 +1,60 @@
 import logging
 import sys
-from collections import OrderedDict
+from copy import deepcopy
 
 from .utils import clear_screan
 
 log = logging.getLogger(__name__)
 
 class Form(object):
-    def __init__(self, fields=[]):
-        self._fields = fields
+    def __init__(self, fields={}):
+        self.__fields = {}
+        self.set_fields(fields)
+
+    def get_field(self, name):
+        return self.__fields[name]
 
     def get_fields(self):
-        return self._fields
-    def add_field(self, field):
-        pass
+        return self.__fields.items()
 
-    def add_fields(self, fields=[]):
-        pass
+    def get_value(self, name, default=None):
+        return self.__fields[name].get_value(default)
+
+    def set_field(self, name, field, deps=[]):
+        dependencies = [self.__fields[dep] for dep in deps]
+        self.__fields[name] = deepcopy(field)
+
+    def set_fields(self, fields={}):
+        link = {}
+        print("v", [id(v) for v in fields.values()])
+        for name, field in fields.items():
+            field_ = deepcopy(field)
+            field_._dependencies = field._dependencies
+            link[field] = field_
+            self.__fields[name] = field_
+
+        self.__fix_dependencies(link)
+
+
+    def __fix_dependencies(self, link):
+        for field in self.__fields.values():
+            for i in range(len(field._dependencies)):
+                dep = field._dependencies[i]
+                if type(dep) is str:
+                    field._dependencies[i] = self.__fields[dep]
+                elif dep in link:
+                    field._dependencies[i] = link[dep]
+                else:
+                    pass
+
+    def set_value(self, name, value):
+        self.__fields[name].set_value(value)
 
     def is_valid(self):
-        for field in self._fields:
-            if field.is_valid():
+        for field in self.__fields.values():
+            if not field.is_valid():
                 return False
         return True
 
-# class Form(object):
-#     def __init__(self, form_data):
-#         self._check_for_ordered_dict(form_data)
-#         self._fields = self._init_fields(form_data)
-
-#     def _check_for_ordered_dict(self, d):
-#         is_supported_python = sys.version_info >= (3, 6)
-#         is_dict = type(d) is dict
-#         is_ordered_dict = type(d) is OrderedDict
-#         is_ordered = is_ordered_dict or (is_dict and is_supported_python)
-#         if not is_ordered:
-#             log.warn(
-#                 "Form data is not an OrderedDict and order may not be perserved"
-#             )
-
-#     def _init_fields(self, form_data):
-#         fields = OrderedDict()
-#         for key, value in form_data.items():
-#             fields[key] = Field(key, options=value)
-#         for field in fields.values():
-#             for dep in field.get_dependencies():
-#                 dep_field = fields.get(dep, None)
-#                 if dep_field is not None:
-#                     field.add_dependency(dep_field)
-#             ok = field.check_properties()
-#         return fields
-
-#     def get(self, key, default=None):
-#         """Alias to get_field"""
-#         return self._fields(key, default)
-
-#     def set(self, key, value):
-#         self._fields[key].value = value
-
-#     @property
-#     def fields(self):
-#         return list(self._fields.values())
-
-#     def is_valid(self):
-#         for value in self.fields:
-#             if not value.is_valid():
-#                 return False
-#         return True
+    def finalize(self):
+        return {(key, value.get_value()) for key, field in self.__form}
